@@ -1,0 +1,76 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+This is an [R Markdown](http://rmarkdown.rstudio.com) Notebook. When you execute code within the notebook, the results appear beneath the code. 
+
+Try executing this chunk by clicking the *Run* button within the chunk or by placing your cursor inside it and pressing *Ctrl+Shift+Enter*. 
+
+```{r}
+data <- read.csv("DSL-StrongPasswordData.csv")
+data <- subset(data, select = -c(2,3))
+
+summary(data)
+```
+
+```{r}
+#Feature Engineering
+base <- subset(data, select = -c(1))
+
+base2 <- base^2
+colnames(base2) <- paste0(names(base), '2')
+
+baseRt <- sqrt(base)
+colnames(baseRt) <- paste0(names(base), 'Rt')
+
+base3 <- base^3
+colnames(base3) <- paste0(names(base), '3')
+
+baseLn <- log(base)
+colnames(baseLn) <- paste0(names(base), 'Ln')
+
+data <- cbind(data, base2, baseRt, base3, baseLn)
+```
+
+```{r}
+#Feature Normalization
+
+```
+
+```{r}
+#Feature Selection and Model Building for each unique subject
+df <- data.frame(names = as.list(unique(data$subject)))
+for (i in unique(data$subject)) {
+  temp <- data
+  temp$subject[(as.character(temp$subject) == i)] <- 0
+  temp$subject[temp$subject != i] <- 1
+  
+  set.seed(as.numeric(Sys.time()))
+  
+  #library(Boruta)
+  #bor <- Boruta(subject~., data = temp)
+  #features <- names(bor$finalDecision[bor$finalDecision == "Confirmed"])
+  #temp <- subset(temp, select = c(features))
+  
+  size <- round(nrow(temp)*0.8)
+  idx <- sample(seq_len(nrow(temp)), size = size)
+  
+  train <- temp[idx, ]
+  test <- temp[-idx, ]
+  
+  xtrain <- subset(train, select = -c(1))
+  xtest <- subset(test, select = -c(1))
+  
+  ytrain <- subset(train, select = c(1))
+  ytest <- subset(test, select = c(1))
+  
+}
+```
+
+```{r}
+```
+
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
